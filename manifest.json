@@ -1,0 +1,27 @@
+{
+  "name": "LiveAgriAlerts",
+  "short_name": "LiveAgriAlerts",
+  "description": "Real-time weather, crop prices, and govt schemes for farmers",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#87ceeb",
+  "theme_color": "#0d47a1",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/96/000000/leaf.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "https://img.icons8.com/color/192/000000/leaf.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://img.icons8.com/color/512/000000/leaf.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
