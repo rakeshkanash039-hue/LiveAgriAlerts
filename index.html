@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LiveAgriAlerts - Live Crop Prices Integration</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #87ceeb 0%, #b0e0ff 50%, #d0f0ff 100%);
+            color: #1a237e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #0d47a1;
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 900;
+            font-size: 2.6rem;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        #logo {
+            width: 45px;
+            height: 45px;
+            margin-right: 12px;
+        }
+
+        #titleAndToggle {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        #heading-en {
+            font-size: 2.6rem;
+            display: inline-block;
+        }
+
+        #heading-hi {
+            font-size: 1.3rem;
+            font-weight: normal;
+            font-style: italic;
+            color: #bbdefb;
+            display: none;
+            margin-top: 3px;
+        }
+
+        #langToggle {
+            position: absolute;
+            right: 0;
+            top: 4px;
+            background-color: #2196f3;
+            border: none;
+            color: white;
+            padding: 0.4rem 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            z-index: 10;
+        }
+
+        #langToggle:hover {
+            background-color: #1769aa;
+            box-shadow: 0 6px 12px rgba(23, 105, 170, 0.6);
+        }
+
+        nav {
+            background-color: #1565c0;
+            display: flex;
+            justify-content: center;
+            padding: 0.5rem 0;
+        }
+
+        nav a {
+            color: white;
+            margin: 0 1.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding-bottom: 3px;
+            border-bottom: 3px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        nav a.active,
+        nav a:hover {
+            border-bottom: 3px solid #81d4fa;
+        }
+
+        main {
+            flex: 1;
+            max-width: 840px;
+            margin: 2rem auto 3rem;
+            padding: 0 1rem;
+        }
+
+        section.page {
+            display: none;
+        }
+
+        section.page.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            padding: 2rem 2.5rem;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            position: relative;
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 20px 36px rgba(0, 0, 0, 0.18);
+        }
+
+        .card img {
+            width: 72px;
+            height: 72px;
+            margin-right: 1.8rem;
+            border-radius: 50%;
+            background: rgba(13, 71, 161, 0.15);
+            padding: 12px;
+            box-shadow: 0 0 20px rgba(13, 71, 161, 0.35);
+            flex-shrink: 0;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover img {
+            box-shadow: 0 0 32px rgba(13, 71, 161, 0.7);
+        }
+
+        h2 {
+            margin: 0 0 0.75rem 0;
+            color: #0d47a1;
+            font-weight: 800;
+            font-size: 1.8rem;
+        }
+
+        #weather,
+        #prices,
+        #tips {
+            font-size: 1.15rem;
+            color: #333;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        button.refresh-btn {
+            background-color: #0d47a1;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 0.75rem 1.8rem;
+            font-size: 1.15rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-left: 2rem;
+            box-shadow: 0 6px 12px rgba(13, 71, 161, 0.5);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button.refresh-btn:hover {
+            background-color: #004182;
+            box-shadow: 0 8px 16px rgba(0, 65, 130, 0.75);
+        }
+
+        #weather-section::before,
+        #prices-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.12;
+            pointer-events: none;
+            border-radius: 20px;
+            z-index: 1;
+        }
+
+        #weather-section::before {
+            background: url('https://www.transparenttextures.com/patterns/clouds.png') repeat;
+            background-size: 110px 110px;
+        }
+
+        #prices-section::before {
+            background: url('https://www.transparenttextures.com/patterns/pwgrunge_white.png') repeat;
+            background-size: 55px 55px;
+        }
+
+        #weather-section>*,
+        #prices-section>* {
+            position: relative;
+            z-index: 2;
+        }
+
+        .scheme-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+            margin-bottom: 1.8rem;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .scheme-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .scheme-icon {
+            width: 64px;
+            height: 64px;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: rgba(13, 71, 161, 0.15);
+            padding: 12px;
+            box-shadow: 0 0 15px rgba(13, 71, 161, 0.35);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .scheme-card:hover .scheme-icon {
+            box-shadow: 0 0 25px rgba(13, 71, 161, 0.7);
+        }
+
+        .scheme-content {
+            flex: 1;
+        }
+
+        .scheme-content h3 {
+            margin: 0 0 6px 0;
+            font-size: 1.5rem;
+            color: #0d47a1;
+            font-weight: 900;
+        }
+
+        .scheme-content p {
+            margin: 4px 0;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .scheme-link {
+            margin-top: 8px;
+            display: inline-block;
+            padding: 8px 14px;
+            background-color: #0d47a1;
+            color: white;
+            font-weight: 700;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .scheme-link:hover {
+            background-color: #004182;
+        }
+
+        nav a {
+            color: white;
+            margin: 0 1.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding-bottom: 3px;
+            border-bottom: 3px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        nav a.active,
+        nav a:hover {
+            border-bottom: 3px solid #81d4fa;
+        }
+
+        main {
+            flex: 1;
+            max-width: 840px;
+            margin: 2rem auto 3rem;
+            padding: 0 1rem;
+        }
+
+        section.page {
+            display: none;
+        }
+
+        section.page.active {
+            display: block;
+        }
+
+        @media (max-width: 580px) {
+
+            .card,
+            .scheme-card {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1.8rem 1.8rem;
+            }
+
+            .card img,
+            .scheme-icon {
+                margin: 0 0 1rem 0;
+                width: 56px;
+                height: 56px;
+            }
+
+            button.refresh-btn {
+                margin-left: 0;
+                width: 100%;
+                padding: 0.9rem 0;
+                font-size: 1.2rem;
+            }
+
+            #langToggle {
+                position: static;
+                margin-top: 1rem;
+                width: 140px;
+                font-size: 1.05rem;
+            }
+        }
+
+        #error {
+            color: red;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <img id="logo" src="https://img.icons8.com/color/96/000000/leaf.png" alt="LiveAgriAlerts Logo" />
+        <div id="titleAndToggle">
+            <span id="heading-en">LiveAgriAlerts</span><br />
+            <small id="heading-hi" style="display:none;">लाइव एग्री अलर्ट्स</small>
+            <button id="langToggle">हिन्दी में देखें</button>
+        </div>
+    </header>
+
+    <nav>
+        <a href="#" data-page="home" class="nav-link active">Home</a>
+        <a href="#" data-page="schemes" class="nav-link">Govt. Schemes</a>
+        <a href="#" data-page="about" class="nav-link">About</a>
+    </nav>
+
+    <main>
+        <section id="home" class="page active">
+            <section class="card" id="weather-section">
+                <img src="https://img.icons8.com/ios-filled/100/0d47a1/partly-cloudy-day.png" alt="Weather Icon" />
+                <div>
+                    <h2><span id="weather-en">Real-Time Weather Updates</span><span id="weather-hi" style="display:none;">वास्तविक-समय मौसम अपडेट्स</span></h2>
+                    <div id="weather">Loading weather data...</div>
+                    <div id="soilMoisture"></div>
+                    <div id="sunTimes"></div>
+                    <div id="error"></div>
+                </div>
+                <button class="refresh-btn" onclick="refreshWeather()"><span id="weatherBtn-en">Refresh</span><span id="weatherBtn-hi" style="display:none;">ताज़ा करें</span></button>
+            </section>
+
+            <section class="card" id="prices-section">
+                <img src="https://img.icons8.com/ios-filled/100/0d47a1/price-tag.png" alt="Price Icon" />
+                <div>
+                    <h2><span id="prices-en">Nearby Crop Prices</span><span id="prices-hi" style="display:none;">निकटतम फसल मूल्य</span></h2>
+                    <div id="prices">Loading crop prices...</div>
+                </div>
+                <button class="refresh-btn" onclick="fetchCropPrices()"><span id="pricesBtn-en">Refresh</span><span id="pricesBtn-hi" style="display:none;">ताज़ा करें</span></button>
+            </section>
+
+            <section class="card" id="tips-section">
+                <img src="https://img.icons8.com/ios-filled/100/0d47a1/plant-under-sun.png" alt="Tips Icon" />
+                <div>
+                    <h2><span id="tips-en">Farming Tips</span><span id="tips-hi" style="display:none;">कृषि सुझाव</span></h2>
+                    <div id="tips">Loading farming tips...</div>
+                </div>
+                <button class="refresh-btn" onclick="refreshTips()"><span id="tipsBtn-en">Refresh</span><span id="tipsBtn-hi" style="display:none;">ताज़ा करें</span></button>
+            </section>
+
+            <div id="tipNotification"></div>
+        </section>
+
+        <section id="schemes" class="page hidden">
+            <h2><span id="schemesTitle-en">Trending Government Schemes</span><span id="schemesTitle-hi" style="display:none;">चालू सरकारी योजनाएँ</span></h2>
+            <p id="schemesDesc-en">Detecting your location and fetching relevant schemes...</p>
+            <p id="schemesDesc-hi" style="display:none;">आपके स्थान का पता लगाया जा रहा है और संबंधित योजनाएँ लाने का प्रयास किया जा रहा है...</p>
+            <div id="schemes-container"></div>
+        </section>
+
+        <section id="about" class="page hidden">
+            <h2><span id="aboutTitle-en">About LiveAgriAlerts</span><span id="aboutTitle-hi" style="display:none;">LiveAgriAlerts के बारे में</span></h2>
+            <p><span id="aboutText-en">This app helps farmers with useful real-time info and guidance.</span><span id="aboutText-hi" style="display:none;">यह ऐप किसानों को उपयोगी वास्तविक समय की जानकारी और मार्गदर्शन प्रदान करता है।</span></p>
+        </section>
+    </main>
+
+    <script>
+        const openWeatherApiKey = '7e3ab8260fcc910432562fbbc7762fe1'; // OpenWeather API key
+        let lang = 'en';
+
+        const cropPriceJSONUrl = 'https://raw.githubusercontent.com/rakeshkanash039-hue/LiveAgriAlerts-Data/main/crop_prices.json';
+
+        const userLocation = {
+            state: 'Maharashtra',
+            district: 'Pune'
+        };
+
+        function convertUnixTime(unix, timezoneOffset) {
+            const date = new Date((unix + timezoneOffset) * 1000);
+            return date.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function displayLiveWeather(data) {
+            const weatherDiv = document.getElementById('weather');
+            const soilMoistureDiv = document.getElementById('soilMoisture');
+            const timezoneOffset = data.timezone;
+            const weather = data.weather[0];
+            const main = data.main;
+            const rain = data.rain && data.rain['1h'] ? data.rain['1h'] : 0;
+            const rainProbability = (rain > 0) ? 'High' : 'Low';
+            const sunrise = convertUnixTime(data.sys.sunrise, timezoneOffset);
+            const sunset = convertUnixTime(data.sys.sunset, timezoneOffset);
+            weatherDiv.innerHTML = `
+        <p>${lang === 'en' ? 'Temperature' : 'तापमान'}: ${main.temp} °C</p>
+        <p>${lang === 'en' ? 'Humidity' : 'आर्द्रता'}: ${main.humidity} %</p>
+        <p>${lang === 'en' ? 'Rain Probability' : 'बारिश की संभावना'}: ${rainProbability}</p>
+        <p><strong>${weather.main} - ${weather.description}</strong></p>
+        <p><em>${lang === 'en' ? 'Sunrise' : 'सूर्योदय'}: ${sunrise}</em>, <em>${lang === 'en' ? 'Sunset' : 'सूर्यास्त'}: ${sunset}</em></p>
+    `;
+            const soilMsg = main.humidity < 40 ?
+                (lang === 'en' ? 'Soil moisture low - consider irrigation.' : 'मिट्टी की नमी कम है - सिंचाई पर विचार करें।') :
+                (lang === 'en' ? 'Soil moisture sufficient.' : 'मिट्टी की नमी पर्याप्त है।');
+            soilMoistureDiv.innerHTML = `<p><em>${soilMsg}</em></p>`;
+        }
+
+        function fetchLiveWeather() {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '';
+            if (!navigator.geolocation) {
+                errorDiv.textContent = lang === 'en' ? 'Geolocation not supported by your browser.' : 'आपके ब्राउज़र में स्थानिक पता समर्थित नहीं है।';
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(position => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${openWeatherApiKey}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to fetch weather data');
+                        return response.json();
+                    })
+                    .then(data => displayLiveWeather(data))
+                    .catch(err => {
+                        errorDiv.textContent = lang === 'en' ? 'Error: ' + err.message : 'त्रुटि: ' + err.message;
+                        document.getElementById('weather').textContent = '';
+                        document.getElementById('soilMoisture').textContent = '';
+                    });
+            }, () => {
+                errorDiv.textContent = lang === 'en' ? 'Permission denied or unable to retrieve location.' : 'स्थानिका अनुमति अस्वीकृत या स्थान पता करने में असमर्थ।';
+            });
+        }
+
+        function refreshWeather() {
+            fetchLiveWeather();
+        }
+
+        function fetchCropPrices() {
+            fetch(cropPriceJSONUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch crop prices JSON');
+                    return response.json();
+                })
+                .then(data => {
+                    displayFilteredCropPrices(data);
+                })
+                .catch(error => {
+                    document.getElementById('prices').textContent = 'Error loading crop prices: ' + error.message;
+                });
+        }
+
+        function displayFilteredCropPrices(data) {
+            const filtered = data.filter(item =>
+                item.State?.toLowerCase() === userLocation.state.toLowerCase() &&
+                (item.District?.toLowerCase() === userLocation.district.toLowerCase() || item.District?.toLowerCase() === 'all')
+            );
+            const pricesDiv = document.getElementById('prices');
+            if (filtered.length === 0) {
+                pricesDiv.textContent = lang === 'en' ? 'No crop price data available for your location.' : 'आपके स्थान के लिए कोई फसल मूल्य डेटा उपलब्ध नहीं है।';
+                return;
+            }
+            let html = '<table style="width:100%; border-collapse: collapse;">' +
+                '<thead><tr><th>Crop</th><th>Min Price (₹/Quintal)</th><th>Max Price (₹/Quintal)</th></tr></thead><tbody>';
+            filtered.forEach(item => {
+                html += `<tr style="border-bottom: 1px solid #ccc;">
+          <td>${item.Crop}</td><td>${item.MinPrice}</td><td>${item.MaxPrice}</td>
+        </tr>`;
+            });
+            html += '</tbody></table>';
+            pricesDiv.innerHTML = html;
+        }
+
+        const farmingTips = {
+            en: ['Use organic fertilizers for better soil health.', 'Monitor pest activity regularly and use eco-friendly controls.', 'Rotate crops annually to improve soil fertility.', 'Irrigate early morning or late evening to minimize evaporation.'],
+            hi: ['बेहतर मिट्टी स्वास्थ्य के लिए जैविक उर्वरकों का उपयोग करें।', 'कीट गतिविधि की नियमित निगरानी करें और पर्यावरण-अनुकूल नियंत्रण का उपयोग करें।', 'मिट्टी की उर्वरता बढ़ाने के लिए सालाना फसल चक्रण करें।', 'वाष्पीकरण कम करने के लिए सुबह जल्दी या शाम को सिंचाई करें।']
+        };
+
+        const quickTips = {
+            en: ['Rotate crops for better soil health.', 'Check weather regularly to plan irrigation.', 'Use natural pest repellents and traps.', 'Harvest in early morning for better yield.'],
+            hi: ['बेहतर मिट्टी के लिए फसल चक्रण करें।', 'सिंचाई योजना के लिए नियमित मौसम जांच करें।', 'प्राकृतिक कीट निवारक और फंदे का उपयोग करें।', 'बेहतर उपज के लिए सुबह जल्दी कटाई करें।']
+        };
+
+        const sampleSchemes = [{
+                title: 'Pradhan Mantri Kisan Samman Nidhi',
+                state: 'All',
+                district: 'All',
+                area: 'All',
+                desc: '₹6000 per year to small and marginal farmers directly in their bank accounts.',
+                moreInfo: 'Financial assistance helping farmers meet agricultural and household needs.',
+                url: 'https://pmkisan.gov.in/'
+            },
+            {
+                title: 'PM Fasal Bima Yojana',
+                state: 'All',
+                district: 'All',
+                area: 'All',
+                desc: 'Crop insurance scheme providing coverage and financial support to farmers in case of crop failure.',
+                moreInfo: 'Ensures financial stability for farmers from natural calamities and pests.',
+                url: 'https://pmfbymo.in/'
+            },
+            {
+                title: 'State Irrigation Grants',
+                state: 'Maharashtra',
+                district: 'All',
+                area: 'All',
+                desc: 'Subsidies and grants for installation of irrigation systems and water conservation efforts.',
+                moreInfo: 'Encourages efficient water use and improves crop yield.',
+                url: 'https://maharashtrai.gov.in/irrigation'
+            },
+            {
+                title: 'District Organic Farming Initiative',
+                state: 'Maharashtra',
+                district: 'Pune',
+                area: 'All',
+                desc: 'Support for promoting organic farming practices in Pune district.',
+                moreInfo: 'Includes training, subsidies, and market linkages.',
+                url: 'https://organicpune.in/'
+            },
+            {
+                title: 'Sub-district Livestock Support',
+                state: 'Maharashtra',
+                district: 'Pune',
+                area: 'Haveli',
+                desc: 'Livestock vaccine and health management programs in Haveli sub-district.',
+                moreInfo: 'Improves farmer income through healthier livestock.',
+                url: 'https://mahafmd.in/'
+            }
+        ];
+
+        function loadSchemes() {
+            const container = document.getElementById('schemes-container');
+            container.innerHTML = lang === 'en' ? '<p>Loading schemes for your area...</p>' : '<p>आपके स्थान के लिए योजनाएँ लोड हो रही हैं...</p>';
+
+            const userLoc = {
+                state: 'Maharashtra',
+                district: 'Pune',
+                area: 'Haveli'
+            };
+
+            const matchedSchemes = sampleSchemes.filter(s =>
+                (s.state === 'All' || s.state === userLoc.state) &&
+                (s.district === 'All' || s.district === userLoc.district) &&
+                (s.area === 'All' || s.area === userLoc.area)
+            );
+
+            if (matchedSchemes.length === 0) {
+                container.innerHTML = lang === 'en' ?
+                    '<p>No schemes found for your location currently.</p>' :
+                    '<p>इस समय आपके स्थान के लिए कोई योजना उपलब्ध नहीं है।</p>';
+            } else {
+                container.innerHTML = matchedSchemes.map(scheme => `
+      <div class="scheme-card">
+        <img class="scheme-icon" src="https://img.icons8.com/color/96/000000/handshake.png" alt="Scheme Icon" />
+        <div class="scheme-content">
+          <h3>${scheme.title}</h3>
+          <p>${scheme.desc}</p>
+          <p><em>${scheme.moreInfo}</em></p>
+          <p><strong>${lang === 'en' ? 'Location' : 'स्थान'}:</strong> ${scheme.area}, ${scheme.district}, ${scheme.state}</p>
+          <a href="${scheme.url}" target="_blank" class="scheme-link">${lang === 'en' ? 'Learn More' : 'और जानें'}</a>
+        </div>
+      </div>`).join('');
+            }
+        }
+
+        const navLinks = document.querySelectorAll('nav a');
+        const pages = document.querySelectorAll('.page');
+
+        function showPage(pageId) {
+            pages.forEach(p => p.classList.toggle('active', p.id === pageId));
+            navLinks.forEach(l => l.classList.toggle('active', l.dataset.page === pageId));
+            if (pageId === 'schemes') loadSchemes();
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                showPage(link.dataset.page);
+            });
+        });
+
+        function toggleLanguage() {
+            lang = lang === 'en' ? 'hi' : 'en';
+            document.getElementById('heading-en').style.display = lang === 'en' ? 'inline' : 'none';
+            document.getElementById('heading-hi').style.display = lang === 'hi' ? 'inline' : 'none';
+
+            [
+                'weather', 'prices', 'tips',
+                'weatherBtn', 'pricesBtn', 'tipsBtn',
+                'schemesTitle', 'schemesDesc',
+                'aboutTitle', 'aboutText',
+            ].forEach(id => {
+                const enElem = document.getElementById(id + '-en');
+                const hiElem = document.getElementById(id + '-hi');
+                if (enElem) enElem.style.display = lang === 'en' ? 'inline' : 'none';
+                if (hiElem) hiElem.style.display = lang === 'hi' ? 'inline' : 'none';
+            });
+
+            refreshWeather();
+            fetchCropPrices();
+            refreshTips();
+            rotateQuickTips();
+        }
+
+        document.getElementById('langToggle').addEventListener('click', toggleLanguage);
+
+        function refreshTips() {
+            const tipsDiv = document.getElementById('tips');
+            tipsDiv.innerHTML = farmingTips[lang].map(tip => `<p>• ${tip}</p>`).join('');
+        }
+
+        let quickTipIndex = 0;
+
+        function rotateQuickTips() {
+            const tipNotification = document.getElementById('tipNotification');
+            tipNotification.textContent = quickTips[lang][quickTipIndex];
+            quickTipIndex = (quickTipIndex + 1) % quickTips[lang].length;
+        }
+        showPage('home');
+        refreshWeather();
+        fetchCropPrices();
+        refreshTips();
+        rotateQuickTips();
+    </script>
+
+</body>
+
+</html>
